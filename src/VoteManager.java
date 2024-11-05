@@ -1,31 +1,43 @@
-/*
- * Gerencia a votação e a validação dos CPFs
- */
+//package urna;
 
 import java.util.HashMap;
 import java.util.Map;
 
 public class VoteManager {
-    private Map<String, String> votes;  // Mapeamento de CPF para opção de voto
-    private ElectionData electionData;
-
+    private Map<String, Integer> votes; 
+    private Map<String, Integer> candidates; 
     public VoteManager() {
-        this.votes = new HashMap<>();
-        this.electionData = new ElectionData();
+        votes = new HashMap<>();
+        candidates = new HashMap<>();
     }
 
-    public boolean validateVote(String cpf, String option) {
-        // Valida se o CPF já votou E se a opção de voto é válida
+    // Método para validar CPF
+    private boolean isValidCPF(String cpf) {
+        return cpf != null && cpf.matches("\\d{11}");     }
+
+    // Método para registrar um voto
+    public boolean vote(String cpf, String candidate) {
+        if (!isValidCPF(cpf)) {
+            System.out.println("CPF inválido.");
+            return false;
+        }
+        if (votes.containsKey(cpf)) {
+            System.out.println("Voto já registrado para este CPF.");
+            return false;
+        }
+        votes.put(cpf, 1);
+        candidates.put(candidate, candidates.getOrDefault(candidate, 0) + 1); // Adiciona voto ao candidato
         return true;
     }
 
-    public void addVote(String cpf, String option) {
-        // Adiciona o voto ao Map, se for válido
+      public Map<String, Integer> calculateResults() {
+        return candidates;
     }
 
-//    public Map<String, Integer> getResults() {
-//        // Retorna o total de votos por opção
-//        return /**/;
-//    }
-
+      public void generateFinalReport() {
+        System.out.println("Relatório Final da Eleição:");
+        for (Map.Entry<String, Integer> entry : candidates.entrySet()) {
+            System.out.println("Candidato: " + entry.getKey() + ", Votos: " + entry.getValue());
+        }
+    }
 }
