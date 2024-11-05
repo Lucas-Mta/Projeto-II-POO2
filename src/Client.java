@@ -1,4 +1,4 @@
-package urna;
+//package urna;
 
 import javax.swing.*;
 import java.awt.*;
