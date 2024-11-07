@@ -1,4 +1,4 @@
-/*
+package clientServer;/*
  * Contém os dados da eleição
  */
 
@@ -14,7 +14,7 @@ public class ElectionData {
         this.options = Arrays.asList("opcao 1", "opcao 2", "opcao 3");
     }
 
-    /* ----------- não sei
+    /* -----------
     public List<String> getOptions() {
         // Retorna as opções de voto
     }
