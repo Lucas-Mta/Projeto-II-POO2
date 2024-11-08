@@ -1,22 +1,32 @@
-package clientServer;/*
- * Contém os dados da eleição
- */
+package clientServer;
 
-import java.util.Arrays;
+import java.io.Serial;
+import java.io.Serializable;
 import java.util.List;
 
-public class ElectionData {
+public class ElectionData implements Serializable {
+    @Serial
+    private static final long serialVersionUID = 1L;
+
     private String question;  // Pergunta da eleição
     private List<String> options;  // Opções de voto
 
-    public ElectionData() {
-        this.question = "bla bla bla";
-        this.options = Arrays.asList("opcao 1", "opcao 2", "opcao 3");
+    public ElectionData(String question, List<String> options) {
+        this.question = question;
+        this.options = options;
     }
 
-    /* -----------
-    public List<String> getOptions() {
-        // Retorna as opções de voto
+    public String getQuestion() {
+        return question;
     }
-    --------------- */
+
+    public List<String> getOptions() {
+        return options;
+    }
+
+    @Override
+    public String toString() {
+        return "Pergunta: " + getQuestion()
+                + "\nOpções:\n" + getOptions();
+    }
 }
