@@ -1,17 +1,17 @@
-package server;
+package client;
 
 import javax.swing.*;
 import java.awt.*;
 
-public class HelpScreen extends JFrame {
+public class ClientHelpScreen extends JFrame {
     private JLabel so_um_teste;
 
-    public HelpScreen() {
+    public ClientHelpScreen() {
         initUI();
     }
 
     private void initUI() {
-        setTitle("Ajuda - Sistema de Votação");
+        setTitle("Ajuda Cliente - Sistema de Votação");
         setSize(400, 500);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);

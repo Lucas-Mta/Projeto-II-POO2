@@ -1,102 +1,122 @@
-/*
 package client;
 
+import clientServer.ElectionData;
+import clientServer.Vote;
+
 import javax.swing.*;
+import javax.swing.border.EmptyBorder;
 import java.awt.*;
-import java.awt.event.KeyAdapter;
-import java.awt.event.KeyEvent;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 public class VotingScreen extends JFrame {
-    private JTextField numberField;
-    private JLabel candidateLabel;
-    private JButton submitButton;
-    private Client client;
+    private ElectionData electionData;
+    private List<JRadioButton> optionButtons;
+    private ButtonGroup buttonGroup;
+    private JButton voteButton;
     private String cpf;
-    private Map<String, String> candidates;
 
-    public VotingScreen(Client client, String cpf) {
-        this.client = client;
+    public VotingScreen(ElectionData electionData, String cpf) {
+        this.electionData = electionData;
         this.cpf = cpf;
-        initCandidates();
+        this.optionButtons = new ArrayList<>();
         initUI();
-    }
-
-    private void initCandidates() {
-        candidates = new HashMap<>();
-        candidates.put("01", "Candidato A");
-        candidates.put("02", "Candidato B");
-        candidates.put("03", "Candidato C");
-        // Adicione mais candidatos conforme necessário
     }
 
     private void initUI() {
         setTitle("Tela de Votação - Sistema de Votação");
-        setSize(400, 300);
+        setSize(500, 450);
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         setLocationRelativeTo(null);
+        setResizable(false);
 
-        JPanel panel = new JPanel();
-        panel.setLayout(new GridBagLayout());
-        GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(10, 10, 10, 10);
-        gbc.fill = GridBagConstraints.HORIZONTAL;
+        // Painel principal
+        JPanel mainPanel = new JPanel(new BorderLayout(15, 15));
+        mainPanel.setBackground(new Color(245, 245, 245));
+        mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        // Coluna esquerda - Exibição do Candidato
-        JLabel labelCandidate = new JLabel("Candidato:");
-        labelCandidate.setFont(new Font("Arial", Font.BOLD, 20));
-        gbc.gridx = 0;
-        gbc.gridy = 0;
-        panel.add(labelCandidate, gbc);
+        // Header -> Pergunta da votação
+        JLabel questionLabel = new JLabel("<html><div style='text-align: center;'>"
+                + electionData.getQuestion() + "</div></html>");
+        questionLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        questionLabel.setBorder(BorderFactory.createCompoundBorder(
+                BorderFactory.createLineBorder(Color.BLACK, 1, true),
+                new EmptyBorder(15, 15, 15, 15)
+        ));
+        questionLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        mainPanel.add(questionLabel, BorderLayout.NORTH);
 
-        candidateLabel = new JLabel(" ");
-        candidateLabel.setFont(new Font("Arial", Font.PLAIN, 18));
-        gbc.gridy = 1;
-        panel.add(candidateLabel, gbc);
+        // Painel de Opções de Voto
+        JPanel optionsPanel = new JPanel();
+        optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
+        optionsPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // Coluna direita - Entrada do Número do Candidato
-        JLabel labelNumber = new JLabel("Número:");
-        labelNumber.setFont(new Font("Arial", Font.BOLD, 20));
-        gbc.gridx = 1;
-        gbc.gridy = 0;
-        panel.add(labelNumber, gbc);
+        // Botões ou Checkbox pra as opções
+        buttonGroup = new ButtonGroup();
+        for (String option : electionData.getOptions()) {
+            JRadioButton optionButton = new JRadioButton(option);
+            optionButton.setFont(new Font("Arial", Font.PLAIN, 16));
+            buttonGroup.add(optionButton);
+            optionButtons.add(optionButton);
+            optionsPanel.add(optionButton);
+        }
 
-        numberField = new JTextField(5);
-        numberField.setFont(new Font("Arial", Font.PLAIN, 18));
-        numberField.addKeyListener(new KeyAdapter() {
-            @Override
-            public void keyReleased(KeyEvent e) {
-                String candidateNumber = numberField.getText();
-                String candidateName = candidates.get(candidateNumber);
-                if (candidateName != null) {
-                    candidateLabel.setText(candidateName);
-                } else {
-                    candidateLabel.setText("Número inválido");
-                }
+        // Adiciona o painel de opções ao centro do painel principal
+        JScrollPane scrollPane = new JScrollPane(optionsPanel);
+        scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
+        scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
+        mainPanel.add(scrollPane);
+
+        // Footer -> Botão de Votar
+        voteButton = new JButton("Confirmar Voto");
+        voteButton.setFont(new Font("Arial", Font.BOLD, 14));
+        voteButton.setBackground(new Color(100, 149, 237));
+        voteButton.setForeground(Color.WHITE);
+        voteButton.setFocusPainted(false);
+        voteButton.setCursor(new Cursor(Cursor.HAND_CURSOR));
+        voteButton.addActionListener(e -> confirmVote());
+        JPanel footerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
+        footerPanel.setBackground(new Color(245, 245, 245));
+        footerPanel.add(voteButton);
+
+        mainPanel.add(footerPanel, BorderLayout.SOUTH);
+
+        add(mainPanel);
+        setVisible(true);
+    }
+
+    // Confirmação de voto
+    private void confirmVote() {
+        String selectedOption = null;
+
+        for (JRadioButton option : optionButtons) {
+            if (option.isSelected()) {
+                selectedOption = option.getText();
+                break;
             }
-        });
-        gbc.gridy = 1;
-        panel.add(numberField, gbc);
+        }
 
-        // Botão Confirmar - Centralizado
-        submitButton = new JButton("Confirmar Voto");
-        submitButton.addActionListener(e -> {
-            String candidateNumber = numberField.getText();
-            if (candidates.containsKey(candidateNumber)) {
-                client.sendVote(cpf, candidateNumber);
-                JOptionPane.showMessageDialog(null, "Voto confirmado! Obrigado por votar.");
-                dispose();
-            } else {
-                JOptionPane.showMessageDialog(null, "Número inválido. Tente novamente.");
-            }
-        });
-        gbc.gridx = 0;
-        gbc.gridy = 2;
-        gbc.gridwidth = 2;
-        panel.add(submitButton, gbc);
+        if (selectedOption != null) {
 
-        add(panel);
+            // Cria um objeto Vote
+            Vote vote = new Vote(cpf, selectedOption);
+
+            // Vai enviar o objeto para o servidor
+            sendVoteToServer(vote);
+
+            JOptionPane.showMessageDialog(this, "Voto confirmado para: " + selectedOption);
+            dispose();
+        } else {
+            JOptionPane.showMessageDialog(this, "Por favor, selecione uma opção antes de confirmar.");
+        }
+    }
+
+    private void sendVoteToServer(Vote vote) {
+        // Implementar a lógica para enviar voto ao servidor via TCP/IP
+        // Isso envolve estabelecer uma conexão de socket com o servidor e enviar o objeto serializado
+        // A classe Vote já implementa Serializable
+        // Exemplo de código de envio:
+        // socketOutputStream.writeObject(vote); // Exemplo fictício de envio pelo socket
+
     }
 }
-*/

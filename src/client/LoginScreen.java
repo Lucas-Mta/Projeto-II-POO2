@@ -1,17 +1,26 @@
 package client;
 
 import clientServer.CPFValidator;
+import clientServer.ElectionData;
 
 import javax.swing.*;
 import javax.swing.text.MaskFormatter;
 import java.awt.*;
 import java.awt.event.*;
 import java.text.ParseException;
+import java.util.List;
 
 public class LoginScreen extends JFrame {
     private JFormattedTextField cpfField;
     private JButton submitButton;
     private JLabel helpLabel;
+
+
+    // APENAS TESTE DE ITENS PARA ELECTION DATA ---- ESSAS INFORMAÇÕES VÃO SER PASSADAS PELA REDE
+    String question = "Pergunta teste";
+    List<String> options = List.of(new String[]{"opção1", "opção2"});
+    ElectionData electionData = new ElectionData(question, options);
+    ///////////////////////////////////////////////////////////////////////////
 
     public LoginScreen() {
         initUI();
@@ -106,11 +115,12 @@ public class LoginScreen extends JFrame {
 
     private void openVotingScreen(String cpf) {
         this.dispose();
+        new VotingScreen(electionData, cpf).setVisible(true);
     }
 
     private void openHelpScreen() {
         this.dispose();
-        new HelpScreen().setVisible(true);
+        new ClientHelpScreen().setVisible(true);
     }
 
     public static void main(String[] args) {
