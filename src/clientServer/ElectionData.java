@@ -8,8 +8,8 @@ public class ElectionData implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String question;  // Pergunta da eleição
-    private List<String> options;  // Opções de voto
+    private final String question;  // Pergunta da eleição
+    private final List<String> options;  // Opções de voto
 
     public ElectionData(String question, List<String> options) {
         this.question = question;

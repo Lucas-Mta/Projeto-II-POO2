@@ -7,8 +7,8 @@ public class Vote implements Serializable {
     @Serial
     private static final long serialVersionUID = 1L;
 
-    private String cpf; // CPF do cliente
-    private String option; // Opção votada pelo eleitor
+    private final String cpf; // CPF do cliente
+    private final String option; // Opção votada pelo eleitor
 
     public Vote(String cpf, String option) {
         this.cpf = cpf;
@@ -25,8 +25,6 @@ public class Vote implements Serializable {
 
     @Override
     public String toString() {
-        return "Voto = ["
-                + cpf + ", "
-                + option + "]";
+        return "Voto = [" + cpf + ", " + option + "]";
     }
 }

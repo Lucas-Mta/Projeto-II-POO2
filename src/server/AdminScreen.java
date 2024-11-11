@@ -6,6 +6,7 @@ import javax.swing.*;
 import java.awt.*;
 import java.awt.event.MouseAdapter;
 import java.awt.event.MouseEvent;
+import java.io.IOException;
 import java.util.ArrayList;
 
 public class AdminScreen extends JFrame {
@@ -14,6 +15,8 @@ public class AdminScreen extends JFrame {
     private ArrayList<JTextField> optionFields;
     private JPanel optionsPanel;
     private JPanel footerPanel;
+
+    private ServerConnectionHandler serverHander;
 
     public AdminScreen() {
         // Configuração da Janela Principal
@@ -175,48 +178,62 @@ public class AdminScreen extends JFrame {
             // Cria o objeto ElectionData que contém as informações da votação
             ElectionData electionData = new ElectionData(question, options);
 
-            JOptionPane.showMessageDialog(votingFrame, "Votação Iniciada com Sucesso!");
+            try {
+                serverHander = new ServerConnectionHandler(1234, electionData); // Porta de exemplo
+                new Thread(serverHander::startServer).start(); // Inicia o servidor em uma nova Thread
+                JOptionPane.showMessageDialog(votingFrame, "Votação Iniciada com Sucesso!");
 
-            // Modifica a interface quando a votação está ativa
-            optionsPanel.removeAll();
-            footerPanel.removeAll();
+                // Modifica a interface quando a votação está ativa
+                optionsPanel.removeAll();
+                footerPanel.removeAll();
 
-            // Mostra apenas a pergunta sem poder editar
-            questionField.setEditable(false);
+                // Mostra apenas a pergunta sem poder editar
+                questionField.setEditable(false);
 
-            // Mostra as opções que foram definidas
-            JLabel optionsLabel = new JLabel("Opções:");
-            optionsLabel.setFont(new Font("Arial", Font.BOLD, 14));
-            optionsPanel.add(optionsLabel);
+                // Mostra as opções que foram definidas
+                JLabel optionsLabel = new JLabel("Opções:");
+                optionsLabel.setFont(new Font("Arial", Font.BOLD, 14));
+                optionsPanel.add(optionsLabel);
 
-            for (String option : electionData.getOptions()) {
-                JLabel optionLabel = new JLabel("\n" + option);
-                optionLabel.setFont(new Font("Arial", Font.PLAIN, 14));
-                optionsPanel.add(optionLabel);
+                for (String option : electionData.getOptions()) {
+                    JLabel optionLabel = new JLabel("\n" + option);
+                    optionLabel.setFont(new Font("Arial", Font.PLAIN, 14));
+                    optionsPanel.add(optionLabel);
+                }
+
+                // Botão para encerrar a votação
+                JButton endVoteButton = new JButton("Encerrar Votação");
+                endVoteButton.setBackground(new Color(0, 102, 204));
+                endVoteButton.setFont(new Font("Arial", Font.BOLD, 12));
+                endVoteButton.setForeground(Color.WHITE);
+                endVoteButton.setFocusPainted(false);
+                endVoteButton.addActionListener(e -> {
+                    try {
+                        endVoting(votingFrame);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                });
+                footerPanel.add(endVoteButton);
+
+                votingFrame.revalidate();
+                votingFrame.repaint();
+                System.out.println(electionData);
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(votingFrame, "Erro ao iniciar o servidor: " + e.getMessage());
             }
-
-            // Botão para encerrar a votação
-            JButton endVoteButton = new JButton("Encerrar Votação");
-            endVoteButton.setBackground(new Color(0, 102, 204));
-            endVoteButton.setFont(new Font("Arial", Font.BOLD, 12));
-            endVoteButton.setForeground(Color.WHITE);
-            endVoteButton.setFocusPainted(false);
-            endVoteButton.addActionListener(e -> {
-                endVoting(votingFrame);
-            });
-            footerPanel.add(endVoteButton);
-
-            votingFrame.revalidate();
-            votingFrame.repaint();
-            System.out.println(electionData);
         } else {
             JOptionPane.showMessageDialog(votingFrame, "Insira uma pergunta e ao menos duas opções de resposta.");
         }
     }
 
     // Encerra a votação e exibe os resultados
-    private void endVoting(JFrame votingFrame) {
-        // Criar exibição dos resultados
+    private void endVoting(JFrame votingFrame) throws IOException {
+        // Finaliza o servidor e desconecta todos os clientes
+        if (serverHander != null) {
+            serverHander.shutdown();
+        }
+
         JOptionPane.showMessageDialog(votingFrame, "Votação Encerrada! Resultados disponíveis.");
         votingFrame.dispose();
     }

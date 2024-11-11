@@ -7,6 +7,7 @@ import javax.swing.*;
 import javax.swing.text.MaskFormatter;
 import java.awt.*;
 import java.awt.event.*;
+import java.io.IOException;
 import java.text.ParseException;
 import java.util.List;
 
@@ -14,15 +15,26 @@ public class LoginScreen extends JFrame {
     private JFormattedTextField cpfField;
     private JButton submitButton;
     private JLabel helpLabel;
+    private ClientConnectionHandler clientConnectionHandler;
+    private ElectionData electionData;
 
-
+/*
     // APENAS TESTE DE ITENS PARA ELECTION DATA ---- ESSAS INFORMAÇÕES VÃO SER PASSADAS PELA REDE
     String question = "Pergunta teste";
     List<String> options = List.of(new String[]{"opção1", "opção2"});
     ElectionData electionData = new ElectionData(question, options);
     ///////////////////////////////////////////////////////////////////////////
 
-    public LoginScreen() {
+ */
+
+    public LoginScreen(String serverAdress, int port) {
+        try {
+            clientConnectionHandler = new ClientConnectionHandler(serverAdress, port);
+            electionData = clientConnectionHandler.getElectionData();
+        } catch (IOException | ClassNotFoundException e) {
+            JOptionPane.showMessageDialog(this, "Erro ao conectar com o servidor: " + e.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+            System.exit(1);
+        }
         initUI();
     }
 
@@ -125,7 +137,7 @@ public class LoginScreen extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new LoginScreen().setVisible(true);
+            new LoginScreen("localhost", 1234).setVisible(true);
         });
     }
 }

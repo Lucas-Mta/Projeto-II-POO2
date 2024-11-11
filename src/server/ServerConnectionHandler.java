@@ -1,42 +1,61 @@
 package server;
 
 import clientServer.ElectionData;
+import clientServer.Vote;
+
 import java.io.IOException;
-import java.io.ObjectOutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.ArrayList;
+import java.util.List;
 
 public class ServerConnectionHandler {
-    private ServerSocket serverSocket;
-    private Socket clientSocket;
-    private ObjectOutputStream out;
+    private final ServerSocket serverSocket;
+    private final ExecutorService clientPool;
+    private final List<ClientHandler> clientHandlers;
+    private final ElectionData electionData;
+    private volatile boolean isRunning = true; // Flag pra controlar o loop
 
-    // Construtor que inicia o servidor
-    public ServerConnectionHandler(int port) throws IOException {
-        serverSocket = new ServerSocket(port);
+    // Construtor que inicia o servidor e armazena dados da eleição
+    public ServerConnectionHandler(int port, ElectionData electionData) throws IOException {
+        this.serverSocket = new ServerSocket(port);
+        this.clientPool = Executors.newCachedThreadPool();
+        this.clientHandlers = new ArrayList<>();
+        this.electionData = electionData;
         System.out.println("Servidor iniciado na porta " + port);
     }
 
-    // Espera pela conexão de um cliente
-    public void waitForClient() throws IOException {
-        clientSocket = serverSocket.accept();
-        out = new ObjectOutputStream(clientSocket.getOutputStream());
-        System.out.println("Cliente conectado: " + clientSocket.getInetAddress());
-    }
+    // Inicia a escuta para conexões de clientes
+    public void startServer() {
+        while (isRunning) {
+            try {
+                Socket clientSocket = serverSocket.accept();
+                System.out.println("Novo cliente conectado: " + clientSocket.getInetAddress());
 
-    // Envia ElectionData ao cliente
-    public void sendElectionData(ElectionData electionData) throws IOException {
-        if (out != null) {
-            out.writeObject(electionData);
-            out.flush();
-            System.out.println("ElectionData enviado ao cliente.");
+                // Cria e inicia um novo ClientHandler para cada cliente
+                ClientHandler handler = new ClientHandler(clientSocket, electionData);
+                clientHandlers.add(handler);
+                clientPool.execute(handler);
+            } catch (IOException e) {
+                if (isRunning) {
+                    System.out.println("Erro ao conectar com o cliente: " + e.getMessage());
+                }
+            }
         }
     }
 
-    // Encerra a conexão
-    public void close() throws IOException {
-        if (out != null) out.close();
-        if (clientSocket != null) clientSocket.close();
-        if (serverSocket != null) serverSocket.close();
+    // Encerra o servidor e desconecta todos os clientes
+    public void shutdown() throws IOException {
+        System.out.println("Encerrando o servidor e desconectando clientes...");
+        isRunning = false;
+        serverSocket.close();
+
+        for (ClientHandler handler : clientHandlers) {
+            handler.disconnectClient();
+        }
+
+        clientPool.shutdown();
     }
 }
