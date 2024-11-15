@@ -2,7 +2,6 @@ package client;
 
 import clientServer.ElectionData;
 import clientServer.Vote;
-import server.ClientHandler;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -30,7 +29,8 @@ public class ClientConnectionHandler {
 
     // Envia o voto para o servidor
     public void sendVote(Vote vote) throws IOException {
-        // Fazer
+        out.writeObject(vote);
+        out.flush();
     }
 
     // Fecha a conexão

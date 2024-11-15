@@ -238,7 +238,7 @@ public class AdminScreen extends JFrame {
         votingFrame.dispose();
     }
 
-    // Método para exibir a Ajuda
+    // Metodo para exibir a Ajuda
     private void showHelp() {
         new AdminHelpScreen(this).setVisible(true);
     }

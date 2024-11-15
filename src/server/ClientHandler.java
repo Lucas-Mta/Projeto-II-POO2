@@ -17,6 +17,7 @@ public class ClientHandler implements Runnable {
     private ObjectInputStream in;
     private boolean isConnected = true;
 
+    // Construtor -> Recebe o socket do cliente e os dados da eleição
     public ClientHandler(Socket clientSocket, ElectionData electionData) {
         this.clientSocket = clientSocket;
         this.electionData = electionData;
@@ -25,18 +26,22 @@ public class ClientHandler implements Runnable {
     @Override
     public void run() {
         try {
+            // Iniciar streams de comunicação
             out = new ObjectOutputStream(clientSocket.getOutputStream());
             in = new ObjectInputStream(clientSocket.getInputStream());
 
             // Enviar os dados da votação para o cliente
             sendElectionData();
 
-            // Escuta a resposta de voto do cliente
+            // Loop pra escutar mensagens do cliente
             while (isConnected) {
                 Object receivedObject = in.readObject();
-                if (receivedObject instanceof Vote) {
-                    Vote vote = (Vote) receivedObject;
+
+                if (receivedObject instanceof Vote vote) {
                     processVote(vote);
+                } else if ("DISCONNECT".equals(receivedObject)) {
+                    // Cliente desconectou
+                    isConnected = false;
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
@@ -48,25 +53,41 @@ public class ClientHandler implements Runnable {
 
     // Envia o ElectionData ao Cliente
     private void sendElectionData() throws IOException {
-        // Fazer
+        out.writeObject(electionData);
+        out.flush();
+        System.out.println("Dados da eleição enviados ao cliente.");
     }
 
     // Manda o voto recebido do Cliente para ser processado
     private void processVote(Vote vote) {
-        // Fazer
+        /* if (voteHandler.hasVoted(vote.getCpf())) {
+            sendMessage("Erro: CPF já votou.");
+        } else {
+            voteHandler.registerVote(vote.getCpf(), vote.getOption());
+            sendMessage("Voto registrado com sucesso!");
+        } */
+    }
+
+    // Envia uma mensagem ao cliente
+    private void sendMessage(String message) {
+        try {
+            out.writeObject(message);
+            out.flush();
+        } catch (IOException e) {
+            System.out.println("Erro ao enviar mensagem ao cliente: " + e.getMessage());
+        }
     }
 
     // Encerra a conexão com o cliente
     public void disconnectClient() {
-        isConnected = false;
         try {
+            isConnected = false;
             if (out != null) out.close();
             if (in != null) in.close();
             if (clientSocket != null) clientSocket.close();
+            System.out.println("Cliente desconectado.");
         } catch (IOException e) {
             System.out.println("Erro ao desconectar o cliente: " + e.getMessage());
         }
-        System.out.println("Cliente desconectado.");
-
     }
 }

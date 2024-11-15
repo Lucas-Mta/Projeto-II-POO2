@@ -9,23 +9,11 @@ import java.awt.*;
 import java.awt.event.*;
 import java.io.IOException;
 import java.text.ParseException;
-import java.util.List;
 
 public class LoginScreen extends JFrame {
     private JFormattedTextField cpfField;
-    private JButton submitButton;
-    private JLabel helpLabel;
     private ClientConnectionHandler clientConnectionHandler;
     private ElectionData electionData;
-
-/*
-    // APENAS TESTE DE ITENS PARA ELECTION DATA ---- ESSAS INFORMAÇÕES VÃO SER PASSADAS PELA REDE
-    String question = "Pergunta teste";
-    List<String> options = List.of(new String[]{"opção1", "opção2"});
-    ElectionData electionData = new ElectionData(question, options);
-    ///////////////////////////////////////////////////////////////////////////
-
- */
 
     public LoginScreen(String serverAdress, int port) {
         try {
@@ -76,7 +64,7 @@ public class LoginScreen extends JFrame {
         gbc.gridx = 1;
         panel.add(cpfField, gbc);
 
-        submitButton = new JButton("Confirmar");
+        JButton submitButton = new JButton("Confirmar");
         submitButton.setBackground(new Color(100, 149, 237));
         submitButton.setForeground(Color.WHITE);
         submitButton.setFocusPainted(false);
@@ -98,7 +86,7 @@ public class LoginScreen extends JFrame {
         gbc.gridwidth = 2;
         panel.add(submitButton, gbc);
 
-        helpLabel = new JLabel("Precisa de ajuda? Clique aqui");
+        JLabel helpLabel = new JLabel("Precisa de ajuda? Clique aqui");
         helpLabel.setFont(new Font("Arial", Font.ITALIC, 12));
         helpLabel.setForeground(new Color(0, 102, 204));
         helpLabel.setCursor(new Cursor(Cursor.HAND_CURSOR));
@@ -137,7 +125,19 @@ public class LoginScreen extends JFrame {
 
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {
-            new LoginScreen("localhost", 1234).setVisible(true);
+            // Permitir entrada de IP e Port para configuração dinâmica
+            String serverAddress = JOptionPane.showInputDialog(null, "Digite o endereço IP do servidor:", "Configuração do Servidor", JOptionPane.QUESTION_MESSAGE);
+            String portInput = JOptionPane.showInputDialog(null, "Digite a porta do servidor:", "Configuração do Servidor", JOptionPane.QUESTION_MESSAGE);
+
+            int port;
+            try {
+                port = Integer.parseInt(portInput);
+            } catch (NumberFormatException e) {
+                JOptionPane.showMessageDialog(null, "Porta inválida! Usando porta padrão 1234.", "Aviso", JOptionPane.WARNING_MESSAGE);
+                port = 1234; // Porta padrão
+            }
+
+            new LoginScreen(serverAddress, port).setVisible(true);
         });
     }
 }

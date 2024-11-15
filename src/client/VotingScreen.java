@@ -112,11 +112,6 @@ public class VotingScreen extends JFrame {
     }
 
     private void sendVoteToServer(Vote vote) {
-        // Implementar a lógica para enviar voto ao servidor via TCP/IP
-        // Isso envolve estabelecer uma conexão de socket com o servidor e enviar o objeto serializado
-        // A classe Vote já implementa Serializable
-        // Exemplo de código de envio:
-        // socketOutputStream.writeObject(vote); // Exemplo fictício de envio pelo socket
 
     }
 }
