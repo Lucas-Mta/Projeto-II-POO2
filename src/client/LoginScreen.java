@@ -135,8 +135,7 @@ public class LoginScreen extends JFrame {
     }
 
     private void openHelpScreen() {
-        this.dispose();
-        new ClientHelpScreen().setVisible(true);
+        new ClientHelpScreen(this).setVisible(true);
     }
 
     public static void main(String[] args) {
