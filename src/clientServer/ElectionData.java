@@ -26,7 +26,9 @@ public class ElectionData implements Serializable {
 
     @Override
     public String toString() {
-        return "Pergunta: " + getQuestion()
-                + "\nOpções:\n" + getOptions();
+        return "\n----------"
+                + "\nPergunta: " + getQuestion()
+                + "\nOpções: " + getOptions()
+                + "\n----------\n";
     }
 }
