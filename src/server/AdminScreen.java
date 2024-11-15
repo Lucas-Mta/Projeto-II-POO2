@@ -241,7 +241,7 @@ public class AdminScreen extends JFrame {
     // Método para exibir a Ajuda
     private void showHelp() {
         this.dispose();
-        new AdminHelpScreen().setVisible(true);
+        new AdminHelpScreen(this).setVisible(true);
     }
 
     public static void main(String[] args) {
