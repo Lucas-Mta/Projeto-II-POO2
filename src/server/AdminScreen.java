@@ -1,6 +1,7 @@
 package server;
 
 import clientServer.ElectionData;
+import clientServer.VoteHandler;
 
 import javax.swing.*;
 import java.awt.*;
@@ -236,6 +237,9 @@ public class AdminScreen extends JFrame {
 
         JOptionPane.showMessageDialog(votingFrame, "Votação Encerrada! Resultados disponíveis.");
         votingFrame.dispose();
+
+        // Mostra os resultados
+        new ReportGenerator(VoteHandler.calculateResults()).setVisible(true);
     }
 
     // Metodo para exibir a Ajuda

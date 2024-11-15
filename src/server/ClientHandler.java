@@ -4,6 +4,7 @@ package server;
 
 import clientServer.ElectionData;
 import clientServer.Vote;
+import clientServer.VoteHandler;
 
 import java.io.IOException;
 import java.io.ObjectInputStream;
@@ -13,14 +14,16 @@ import java.net.Socket;
 public class ClientHandler implements Runnable {
     private final Socket clientSocket;
     private final ElectionData electionData;
+    private final VoteHandler voteHandler;
     private ObjectOutputStream out;
     private ObjectInputStream in;
     private boolean isConnected = true;
 
     // Construtor -> Recebe o socket do cliente e os dados da eleição
-    public ClientHandler(Socket clientSocket, ElectionData electionData) {
+    public ClientHandler(Socket clientSocket, ElectionData electionData, VoteHandler voteHandler) {
         this.clientSocket = clientSocket;
         this.electionData = electionData;
+        this.voteHandler = voteHandler;
     }
 
     @Override
@@ -37,7 +40,10 @@ public class ClientHandler implements Runnable {
             while (isConnected) {
                 Object receivedObject = in.readObject();
 
-                if (receivedObject instanceof Vote vote) {
+                if (receivedObject instanceof String) {
+                    String cpf = (String) receivedObject;
+                    processLogin(cpf);
+                } else if (receivedObject instanceof Vote vote) {
                     processVote(vote);
                 } else if ("DISCONNECT".equals(receivedObject)) {
                     // Cliente desconectou
@@ -45,9 +51,11 @@ public class ClientHandler implements Runnable {
                 }
             }
         } catch (IOException | ClassNotFoundException e) {
-            System.out.println("Erro na conexão com o cliente: " + e.getMessage());
-        } finally {
-            disconnectClient();
+            if (e.getMessage().contains("Connection reset")) {
+                System.out.println("Cliente desconectado.");
+            } else {
+                System.out.println("Erro na conexão com o cliente: " + e.getMessage());
+            }
         }
     }
 
@@ -58,14 +66,22 @@ public class ClientHandler implements Runnable {
         System.out.println("Dados da eleição enviados ao cliente.");
     }
 
-    // Manda o voto recebido do Cliente para ser processado
-    private void processVote(Vote vote) {
-        /* if (voteHandler.hasVoted(vote.getCpf())) {
-            sendMessage("Erro: CPF já votou.");
+    // Verifica se o CPF já votou
+    private void processLogin(String cpf) {
+        if (voteHandler.hasVoted(cpf)) {
+            sendMessage("CPF já votou");
         } else {
-            voteHandler.registerVote(vote.getCpf(), vote.getOption());
+            sendMessage("CPF não votou");
+        }
+    }
+
+    // Processa o voto recebido e registra no VoteHandler
+    private void processVote(Vote vote) {
+        if (voteHandler.addVote(vote)) {
             sendMessage("Voto registrado com sucesso!");
-        } */
+        } else {
+            sendMessage("Erro ao registrar o voto.");
+        }
     }
 
     // Envia uma mensagem ao cliente
@@ -85,7 +101,7 @@ public class ClientHandler implements Runnable {
             if (out != null) out.close();
             if (in != null) in.close();
             if (clientSocket != null) clientSocket.close();
-            System.out.println("Cliente desconectado.");
+            System.out.println("Cliente desconectado.\n");
         } catch (IOException e) {
             System.out.println("Erro ao desconectar o cliente: " + e.getMessage());
         }

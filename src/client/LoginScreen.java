@@ -74,8 +74,24 @@ public class LoginScreen extends JFrame {
             @Override
             public void actionPerformed(ActionEvent e) {
                 String cpf = cpfField.getText();
+
+                // Verifica se o CPF é válido
                 if (CPFValidator.isValid(cpf)) {
-                    openVotingScreen(cpf);
+                    try {
+                        // Envia o CPF ao servidor para verificar se já votou
+                        clientConnectionHandler.sendCPFToServer(cpf);
+                        String serverResponse = clientConnectionHandler.receiveServerResponse();
+
+                        if ("CPF já votou".equals(serverResponse)) {
+                            JOptionPane.showMessageDialog(LoginScreen.this, "CPF já votou!", "Erro", JOptionPane.ERROR_MESSAGE);
+                        } else if ("CPF não votou".equals(serverResponse)) {
+                            openVotingScreen(cpf);
+                        } else {
+                            JOptionPane.showMessageDialog(LoginScreen.this, "Erro desconhecido!", "Erro", JOptionPane.ERROR_MESSAGE);
+                        }
+                    } catch (IOException | ClassNotFoundException ex) {
+                        JOptionPane.showMessageDialog(LoginScreen.this, "Erro ao comunicar com o servidor: " + ex.getMessage(), "Erro", JOptionPane.ERROR_MESSAGE);
+                    }
                 } else {
                     JOptionPane.showMessageDialog(LoginScreen.this, "CPF inválido!", "Erro", JOptionPane.ERROR_MESSAGE);
                 }
@@ -115,7 +131,7 @@ public class LoginScreen extends JFrame {
 
     private void openVotingScreen(String cpf) {
         this.dispose();
-        new VotingScreen(electionData, cpf).setVisible(true);
+        new VotingScreen(electionData, cpf, clientConnectionHandler).setVisible(true);
     }
 
     private void openHelpScreen() {

@@ -33,6 +33,18 @@ public class ClientConnectionHandler {
         out.flush();
     }
 
+    // Envia o CPF ao servidor
+    public void sendCPFToServer(String cpf) throws IOException {
+        out.writeObject(cpf);
+        out.flush();
+    }
+
+    // Recebe as mensagens do servidor
+    public String receiveServerResponse() throws IOException, ClassNotFoundException {
+        Object response = in.readObject();
+        return (String) response;
+    }
+
     // Fecha a conexão
     public void close() throws IOException {
         out.close();

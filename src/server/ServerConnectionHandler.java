@@ -1,6 +1,7 @@
 package server;
 
 import clientServer.ElectionData;
+import clientServer.VoteHandler;
 
 import java.io.IOException;
 import java.net.ServerSocket;
@@ -15,6 +16,7 @@ public class ServerConnectionHandler {
     private final ExecutorService clientPool;
     private final List<ClientHandler> clientHandlers = new ArrayList<>();
     private final ElectionData electionData;
+    private final VoteHandler voteHandler;
     private volatile boolean isRunning = true;
 
     // Construtor que inicia o servidor e armazena dados da eleição
@@ -22,6 +24,7 @@ public class ServerConnectionHandler {
         this.serverSocket = new ServerSocket(port);
         this.clientPool = Executors.newCachedThreadPool();
         this.electionData = electionData;
+        this.voteHandler = new VoteHandler();
         System.out.println("Servidor iniciado na porta " + port);
     }
 
@@ -35,7 +38,7 @@ public class ServerConnectionHandler {
                 System.out.println("Novo cliente conectado: " + clientSocket.getInetAddress());
 
                 // Cria e inicia um novo ClientHandler para cada cliente
-                ClientHandler clientHandler = new ClientHandler(clientSocket, electionData);
+                ClientHandler clientHandler = new ClientHandler(clientSocket, electionData, voteHandler);
                 clientHandlers.add(clientHandler);
                 clientPool.execute(clientHandler); // Executa o cliente em uma thread separada
             }

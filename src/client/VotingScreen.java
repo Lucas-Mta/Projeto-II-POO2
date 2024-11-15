@@ -6,6 +6,7 @@ import clientServer.Vote;
 import javax.swing.*;
 import javax.swing.border.EmptyBorder;
 import java.awt.*;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -15,10 +16,12 @@ public class VotingScreen extends JFrame {
     private ButtonGroup buttonGroup;
     private JButton voteButton;
     private String cpf;
+    private ClientConnectionHandler clientConnectionHandler;
 
-    public VotingScreen(ElectionData electionData, String cpf) {
+    public VotingScreen(ElectionData electionData, String cpf, ClientConnectionHandler clientConnectionHandler) {
         this.electionData = electionData;
         this.cpf = cpf;
+        this.clientConnectionHandler = clientConnectionHandler;
         this.optionButtons = new ArrayList<>();
         initUI();
     }
@@ -97,21 +100,22 @@ public class VotingScreen extends JFrame {
         }
 
         if (selectedOption != null) {
-
-            // Cria um objeto Vote
             Vote vote = new Vote(cpf, selectedOption);
 
-            // Vai enviar o objeto para o servidor
-            sendVoteToServer(vote);
-
-            JOptionPane.showMessageDialog(this, "Voto confirmado para: " + selectedOption);
-            dispose();
+            try {
+                sendVoteToServer(vote);
+                JOptionPane.showMessageDialog(this, "Voto confirmado para: " + selectedOption);
+                dispose();
+            } catch (IOException e) {
+                JOptionPane.showMessageDialog(this, "Erro ao enviar o voto. Tente novamente.");
+                e.printStackTrace();
+            }
         } else {
             JOptionPane.showMessageDialog(this, "Por favor, selecione uma opção antes de confirmar.");
         }
     }
 
-    private void sendVoteToServer(Vote vote) {
-
+    private void sendVoteToServer(Vote vote) throws IOException {
+        clientConnectionHandler.sendVote(vote);
     }
 }
