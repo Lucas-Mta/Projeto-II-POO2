@@ -246,8 +246,4 @@ public class AdminScreen extends JFrame {
     private void showHelp() {
         new AdminHelpScreen(this).setVisible(true);
     }
-
-    public static void main(String[] args) {
-        new AdminScreen();
-    }
 }

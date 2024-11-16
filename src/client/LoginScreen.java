@@ -137,22 +137,4 @@ public class LoginScreen extends JFrame {
     private void openHelpScreen() {
         new ClientHelpScreen(this).setVisible(true);
     }
-
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            // Permitir entrada de IP e Port para configuração dinâmica
-            String serverAddress = JOptionPane.showInputDialog(null, "Digite o endereço IP do servidor:", "Configuração do Servidor", JOptionPane.QUESTION_MESSAGE);
-            String portInput = JOptionPane.showInputDialog(null, "Digite a porta do servidor:", "Configuração do Servidor", JOptionPane.QUESTION_MESSAGE);
-
-            int port;
-            try {
-                port = Integer.parseInt(portInput);
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(null, "Porta inválida! Usando porta padrão 1234.", "Aviso", JOptionPane.WARNING_MESSAGE);
-                port = 1234; // Porta padrão
-            }
-
-            new LoginScreen(serverAddress, port).setVisible(true);
-        });
-    }
 }
