@@ -10,15 +10,22 @@ import java.awt.event.MouseEvent;
 import java.io.IOException;
 import java.util.ArrayList;
 
+/** AdminScreen represents the administrative interface for the distributed voting system.
+  * This class provides a graphical user interface for administrators to:
+  * - Create new voting sessions
+  * - Configure voting questions and options
+  * - Start and end voting sessions
+  * - View voting results
+  * The interface is built using Swing components and follows a responsive design pattern.  */
 public class AdminScreen extends JFrame {
+    private JTextField questionField;                       // Field for entering the voting question
+    private ArrayList<JTextField> optionFields;             // List of fields for entering voting options
+    private JPanel optionsPanel;                            // Panel containing the voting options
+    private JPanel footerPanel;                             // Panel containing the control buttons
+    private ServerConnectionHandler serverHander;           // Handles server connections and communication
 
-    private JTextField questionField;
-    private ArrayList<JTextField> optionFields;
-    private JPanel optionsPanel;
-    private JPanel footerPanel;
-
-    private ServerConnectionHandler serverHander;
-
+    /** Constructs the initial admin interface with a button to create new voting sessions
+      * and a help option. Sets up the main window with proper sizing and positioning.        */
     public AdminScreen() {
         // Configuração da Janela Principal
         setTitle("Administração - Sistema de Votação");
@@ -27,7 +34,6 @@ public class AdminScreen extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
-        // Painel principal
         JPanel initialPanel = new JPanel(new GridBagLayout());
         initialPanel.setBackground(new Color(245, 245, 245));
 
@@ -35,7 +41,6 @@ public class AdminScreen extends JFrame {
         gbc.insets = new Insets(10, 10, 10, 10);
         gbc.fill = GridBagConstraints.CENTER;
 
-        // Botão para Nova Votação
         JButton createVoteButton = new JButton("Nova Votação");
         createVoteButton.setFont(new Font("Arial", Font.BOLD, 16));
         createVoteButton.setBackground(new Color(0, 102, 204));
@@ -51,7 +56,6 @@ public class AdminScreen extends JFrame {
         gbc.gridwidth = 1;
         initialPanel.add(createVoteButton, gbc);
 
-        // Label de ajuda abaixo do botão
         JLabel helpLabel = new JLabel("Precisa de ajuda? Clique aqui");
         helpLabel.setFont(new Font("Arial", Font.ITALIC, 14));
         helpLabel.setForeground(Color.GRAY);
@@ -69,17 +73,19 @@ public class AdminScreen extends JFrame {
         setVisible(true);
     }
 
-    // Abre a interface de criação da votação
+    /** Opens the voting setup interface where the administrator can:
+      * - Enter the voting question
+      * - Add multiple voting options
+      * - Start the voting session
+      * The interface includes a scrollable panel for options and control buttons
+      * in the footer.                                                                     */
     private void openVotingSetup() {
-
-        // Configurações da janela de votação
         JFrame votingFrame = new JFrame("Configurações da Nova Votação");
         votingFrame.setSize(500, 400);
         votingFrame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         votingFrame.setLocationRelativeTo(null);
         votingFrame.setResizable(false);
 
-        // Header com a pergunta da votação
         JPanel headerPanel = new JPanel(new BorderLayout());
         headerPanel.setBorder(BorderFactory.createEmptyBorder(15, 15, 15, 15));
         headerPanel.setBackground(new Color(240, 240, 240));
@@ -94,19 +100,16 @@ public class AdminScreen extends JFrame {
 
         votingFrame.add(headerPanel, BorderLayout.NORTH);
 
-        // Painel de Opções
         optionsPanel = new JPanel();
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
         optionFields = new ArrayList<>();
-        addOptionField(); // Adiciona uma opção inicial
+        addOptionField();
 
-        // JScrollPane para as opções
         JScrollPane scrollPane = new JScrollPane(optionsPanel);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
         scrollPane.setPreferredSize(new Dimension(450, 200));
 
-        // Painel central para opções de resposta
         JPanel mainPanel = new JPanel();
         mainPanel.setLayout(new BorderLayout());
         mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 15, 10, 15));
@@ -115,7 +118,6 @@ public class AdminScreen extends JFrame {
 
         votingFrame.add(mainPanel, BorderLayout.CENTER);
 
-        // Footer com os botões
         footerPanel = new JPanel(new FlowLayout(FlowLayout.CENTER));
         footerPanel.setBackground(new Color(0, 102, 204));
 
@@ -156,14 +158,19 @@ public class AdminScreen extends JFrame {
         votingFrame.setVisible(true);
     }
 
-    // Adiciona um campo de opção da votação
+    /** Adds a new text field to the options panel for entering an additional
+      * voting option. The new field is automatically added to the optionFields list
+      * and displayed in the UI.                                                            */
     private void addOptionField() {
         JTextField optionField = new JTextField(20);
         optionFields.add(optionField);
         optionsPanel.add(optionField);
     }
 
-    // Iniciar a votação
+    /** Initiates the voting session with the configured question and options.
+      * Validates the input to ensure there is a question and at least two options.
+      * Starts the server and updates the UI to show the active voting session.
+      * @param votingFrame The JFrame containing the voting configuration                    */
     private void startVoting(JFrame votingFrame) {
         String question = questionField.getText().trim();
         ArrayList<String> options = new ArrayList<>();
@@ -176,22 +183,18 @@ public class AdminScreen extends JFrame {
         }
 
         if (!question.isEmpty() && options.size() > 1) {
-            // Cria o objeto ElectionData que contém as informações da votação
+            // Creates the ElectionData object that contains the voting information
             ElectionData electionData = new ElectionData(question, options);
 
             try {
                 serverHander = new ServerConnectionHandler(1234, electionData); // Porta de exemplo
-                new Thread(serverHander::startServer).start(); // Inicia o servidor em uma nova Thread
+                new Thread(serverHander::startServer).start(); // Starts the server in a new thread
                 JOptionPane.showMessageDialog(votingFrame, "Votação Iniciada com Sucesso!");
 
-                // Modifica a interface quando a votação está ativa
                 optionsPanel.removeAll();
                 footerPanel.removeAll();
-
-                // Mostra apenas a pergunta sem poder editar
                 questionField.setEditable(false);
 
-                // Mostra as opções que foram definidas
                 JLabel optionsLabel = new JLabel("Opções:");
                 optionsLabel.setFont(new Font("Arial", Font.BOLD, 14));
                 optionsPanel.add(optionsLabel);
@@ -202,7 +205,6 @@ public class AdminScreen extends JFrame {
                     optionsPanel.add(optionLabel);
                 }
 
-                // Botão para encerrar a votação
                 JButton endVoteButton = new JButton("Encerrar Votação");
                 endVoteButton.setBackground(new Color(0, 102, 204));
                 endVoteButton.setFont(new Font("Arial", Font.BOLD, 12));
@@ -228,7 +230,10 @@ public class AdminScreen extends JFrame {
         }
     }
 
-    // Encerra a votação e exibe os resultados
+    /** Ends the current voting session, disconnects all clients, and displays the results.
+      * Shuts down the server and launches the report generator to show voting statistics.
+      * @param votingFrame The JFrame of the active voting session
+      * @throws IOException If there's an error while shutting down the server             */
     private void endVoting(JFrame votingFrame) throws IOException {
         // Finaliza o servidor e desconecta todos os clientes
         if (serverHander != null) {
@@ -238,15 +243,18 @@ public class AdminScreen extends JFrame {
         JOptionPane.showMessageDialog(votingFrame, "Votação Encerrada! Resultados disponíveis.");
         votingFrame.dispose();
 
-        // Mostra os resultados
         new ReportGenerator(VoteHandler.calculateResults()).setVisible(true);
     }
 
-    // Metodo para exibir a Ajuda
+    /** Displays the help screen with information about using the admin interface.
+      * Creates and shows a new AdminHelpScreen instance.                                  */
     private void showHelp() {
         new AdminHelpScreen(this).setVisible(true);
     }
 
+    /** Main entry point for the admin interface.
+      * Creates and displays the initial admin screen.
+      * @param args Command line arguments (not used)     */
     public static void main(String[] args) {
         new AdminScreen();
     }

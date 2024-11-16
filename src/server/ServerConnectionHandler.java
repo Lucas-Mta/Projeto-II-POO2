@@ -11,15 +11,21 @@ import java.util.concurrent.Executors;
 import java.util.ArrayList;
 import java.util.List;
 
+/** Handles server connections for the distributed voting system.
+  * This class manages client connections, initializes the server socket,
+  * and coordinates the multithreaded handling of client requests.             */
 public class ServerConnectionHandler {
-    private final ServerSocket serverSocket;
-    private final ExecutorService clientPool;
-    private final List<ClientHandler> clientHandlers = new ArrayList<>();
-    private final ElectionData electionData;
-    private final VoteHandler voteHandler;
-    private volatile boolean isRunning = true;
+    private final ServerSocket serverSocket;                                     // Server socket for accepting client connections
+    private final ExecutorService clientPool;                                    // Thread pool for managing concurrent client connections
+    private final List<ClientHandler> clientHandlers = new ArrayList<>();        // List to keep track of all connected clients
+    private final ElectionData electionData;                                     // Stores election configuration and voting options
+    private final VoteHandler voteHandler;                                       // Manages and processes all votes received from clients
+    private volatile boolean isRunning = true;                                   // Flag to control server execution state
 
-    // Construtor que inicia o servidor e armazena dados da eleição
+    /** Initializes the server with specified port and election data.
+      * @param port The port number on which the server will listen
+      * @param electionData The election configuration data including voting options
+      * @throws IOException If there's an error creating the server socket                */
     public ServerConnectionHandler(int port, ElectionData electionData) throws IOException {
         this.serverSocket = new ServerSocket(port);
         this.clientPool = Executors.newCachedThreadPool();
@@ -28,18 +34,22 @@ public class ServerConnectionHandler {
         System.out.println("Servidor iniciado na porta " + port);
     }
 
-    // Inicia a escuta para conexões de clientes
+    /** Starts the server and begins accepting client connections.
+      * Uses a thread pool to handle multiple clients concurrently.
+      * Continues running until shutdown is called.                                       */
     public void startServer() {
         System.out.println("Servidor aguardando conexões...");
         try {
             while (isRunning) {
-                // Aceitar novas conexões de clientes
+                // Accept new client connection
                 Socket clientSocket = serverSocket.accept();
                 System.out.println("Novo cliente conectado: " + clientSocket.getInetAddress());
 
-                // Cria e inicia um novo ClientHandler para cada cliente
+                // Create and initialize a new handler for the client
                 ClientHandler clientHandler = new ClientHandler(clientSocket, electionData, voteHandler);
                 clientHandlers.add(clientHandler);
+
+                // Execute client handler in a separate thread from the pool
                 clientPool.execute(clientHandler); // Executa o cliente em uma thread separada
             }
         } catch (IOException e) {
@@ -49,20 +59,21 @@ public class ServerConnectionHandler {
         }
     }
 
-    // Encerra o servidor e desconecta todos os clientes
+    /** Performs a graceful shutdown of the server.
+      * Closes all client connections, stops accepting new connections,
+      * and cleanly terminates the thread pool.                                      */
     public void shutdown() {
         try {
             System.out.println("Encerrando o servidor...");
             isRunning = false;
 
-            // Fechar o socket do servidor
             serverSocket.close();
 
+            // Disconnect all connected clients
             for (ClientHandler clientHandler : clientHandlers) {
                 clientHandler.disconnectClient();
             }
 
-            // Finalizar o pool de threads
             clientPool.shutdown();
             System.out.println("Servidor encerrado com sucesso.");
         } catch (IOException e) {

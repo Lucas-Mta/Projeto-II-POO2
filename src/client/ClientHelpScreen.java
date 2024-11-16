@@ -135,8 +135,8 @@ public class ClientHelpScreen extends JDialog {
      * @param index - Index of the card to be created
      * @return - JPanel configured with card content    */
     private JPanel createHelpCard(int index) {
-        String path = System.getProperty("user.dir");
-        path += (index == 0) ? "/images/helpAD" : "/images/helpCL";;
+                                                                                        String path = System.getProperty("user.dir");
+        path += (index == 0) ? "/images/helpAD" : "/images/helpCL";
         JPanel card = new JPanel(new BorderLayout(10, 10));
         card.setBorder(BorderFactory.createEmptyBorder(5, 5, 5, 5));
 

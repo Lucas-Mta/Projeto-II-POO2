@@ -5,19 +5,22 @@ import java.io.Serial;
 import java.util.Map;
 import javax.swing.*;
 
+/** ReportGenerator creates a graphical window to display the final election results.
+  * It presents vote counts for each option in a clean, readable format using Swing components.  */
 public class ReportGenerator extends JFrame {
     @Serial
-    private static final long serialVersionUID = 1L;
+    private static final long serialVersionUID = 1L;       // Serialization identifier for the class
 
+    /** Creates a new window to display election results.
+      * Initializes the GUI components and displays the vote counts.
+      * @param voteCounts Map containing voting options and their respective vote counts          */
     public ReportGenerator(Map<String, Integer> voteCounts) {
-        // Configurações da janela
         setTitle("Relatório Final da Eleição");
         setSize(400, 350);
         setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
         setLocationRelativeTo(null);
         setResizable(false);
 
-        // Painel principal
         JPanel panel = new JPanel();
         panel.setLayout(new GridBagLayout());
         panel.setBackground(new Color(245, 245, 245));
@@ -28,7 +31,6 @@ public class ReportGenerator extends JFrame {
         gbc.weightx = 1.0;
         gbc.weighty = 1.0;
 
-        // Título
         JLabel titleLabel = new JLabel("Relatório Final da Eleição");
         titleLabel.setFont(new Font("Arial", Font.BOLD, 20));
         titleLabel.setForeground(new Color(60, 60, 60));
@@ -38,7 +40,6 @@ public class ReportGenerator extends JFrame {
         gbc.weighty = 0.0;
         panel.add(titleLabel, gbc);
 
-        // Área de relatório com texto
         JTextArea textArea = new JTextArea();
         textArea.setEditable(false);
         textArea.setFont(new Font("Arial", Font.PLAIN, 14));
@@ -54,7 +55,6 @@ public class ReportGenerator extends JFrame {
         gbc.fill = GridBagConstraints.BOTH;
         panel.add(scrollPane, gbc);
 
-        // Botão de OK
         JButton okButton = new JButton("OK");
         okButton.setBackground(new Color(100, 149, 237));
         okButton.setForeground(Color.WHITE); // Texto branco
@@ -70,12 +70,12 @@ public class ReportGenerator extends JFrame {
         gbc.fill = GridBagConstraints.NONE;
         gbc.anchor = GridBagConstraints.CENTER;
         panel.add(okButton, gbc);
-
-        // Adiciona o painel à janela
         add(panel);
     }
-
-    // Gera o texto do relatório final
+    /** Generates a formatted string containing the election results.
+      * Creates a report showing the vote count for each option.
+      * @param voteCounts Map containing voting options and their respective vote counts
+      * @return Formatted string containing the election report                              */
     private String generateReport(Map<String, Integer> voteCounts) {
         StringBuilder report = new StringBuilder("Relatório Final da Eleição:\n\n");
         for (Map.Entry<String, Integer> entry : voteCounts.entrySet()) {
