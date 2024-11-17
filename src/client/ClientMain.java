@@ -2,6 +2,12 @@ package client;
 
 import javax.swing.*;
 
+/** Main entry point of the application.
+ * Prompts for server configuration and initializes the login screen.
+ * Uses SwingUtilities.invokeLater to ensure thread safety in Swing.
+ * param args Command line arguments (not used)
+ */
+
 public class ClientMain {
     public static void main(String[] args) {
         SwingUtilities.invokeLater(() -> {

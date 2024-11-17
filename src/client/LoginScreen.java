@@ -157,27 +157,4 @@ public class LoginScreen extends JFrame {
     private void openHelpScreen() {
         new ClientHelpScreen(this).setVisible(true);
     }
-
-
-
-    /** Main entry point of the application.
-      * Prompts for server configuration and initializes the login screen.
-      * Uses SwingUtilities.invokeLater to ensure thread safety in Swing.
-      * @param args Command line arguments (not used)                 */
-    public static void main(String[] args) {
-        SwingUtilities.invokeLater(() -> {
-            String serverAddress = JOptionPane.showInputDialog(null, "Digite o endereço IP do servidor:", "Configuração do Servidor", JOptionPane.QUESTION_MESSAGE);
-            String portInput = JOptionPane.showInputDialog(null, "Digite a porta do servidor:", "Configuração do Servidor", JOptionPane.QUESTION_MESSAGE);
-
-            int port;
-            try {
-                port = Integer.parseInt(portInput);
-            } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(null, "Porta inválida! Usando porta padrão 1234.", "Aviso", JOptionPane.WARNING_MESSAGE);
-                port = 1234;
-            }
-
-            new LoginScreen(serverAddress, port).setVisible(true);
-        });
-    }
 }

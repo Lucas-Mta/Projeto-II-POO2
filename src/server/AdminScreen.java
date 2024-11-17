@@ -252,10 +252,4 @@ public class AdminScreen extends JFrame {
         new AdminHelpScreen(this).setVisible(true);
     }
 
-    /** Main entry point for the admin interface.
-      * Creates and displays the initial admin screen.
-      * @param args Command line arguments (not used)     */
-    public static void main(String[] args) {
-        new AdminScreen();
-    }
 }
