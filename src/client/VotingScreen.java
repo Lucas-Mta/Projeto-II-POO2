@@ -10,14 +10,21 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+/** A graphical user interface for the voting screen in the distributed voting system.
+  * This class represents the screen where users can cast their votes after logging in.
+  * It displays the election question and voting options as radio buttons.           */
 public class VotingScreen extends JFrame {
-    private ElectionData electionData;
-    private List<JRadioButton> optionButtons;
-    private ButtonGroup buttonGroup;
-    private JButton voteButton;
-    private String cpf;
-    private ClientConnectionHandler clientConnectionHandler;
+    private ElectionData electionData;                             // Election data containing the question and voting options
+    private List<JRadioButton> optionButtons;                      // List of radio buttons for voting options
+    private ButtonGroup buttonGroup;                               // Button group to ensure only one option can be selected
+    private JButton voteButton;                                    // Button to confirm and submit the vote
+    private String cpf;                                            // User's CPF (Brazilian individual taxpayer registry identification)
+    private ClientConnectionHandler clientConnectionHandler;       // Handler for client-server communication
 
+    /** Constructs a new voting screen with the specified election data and user information.
+      * @param electionData The data containing the election question and options
+      * @param cpf The user's CPF identification
+      * @param clientConnectionHandler Handler for managing server communication              */
     public VotingScreen(ElectionData electionData, String cpf, ClientConnectionHandler clientConnectionHandler) {
         this.electionData = electionData;
         this.cpf = cpf;
@@ -26,6 +33,12 @@ public class VotingScreen extends JFrame {
         initUI();
     }
 
+    /** Initializes the user interface components of the voting screen.
+      * Sets up the main panel, question display, voting options, and confirmation button.
+      * The screen is divided into three main sections:
+      * - Header: Displays the election question
+      * - Center: Shows the voting options as radio buttons
+      * - Footer: Contains the vote confirmation button                               */
     private void initUI() {
         setTitle("Tela de Votação - Sistema de Votação");
         setSize(500, 450);
@@ -33,12 +46,10 @@ public class VotingScreen extends JFrame {
         setLocationRelativeTo(null);
         setResizable(false);
 
-        // Painel principal
         JPanel mainPanel = new JPanel(new BorderLayout(15, 15));
         mainPanel.setBackground(new Color(245, 245, 245));
         mainPanel.setBorder(new EmptyBorder(15, 15, 15, 15));
 
-        // Header -> Pergunta da votação
         JLabel questionLabel = new JLabel("<html><div style='text-align: center;'>"
                 + electionData.getQuestion() + "</div></html>");
         questionLabel.setFont(new Font("Arial", Font.BOLD, 18));
@@ -49,12 +60,10 @@ public class VotingScreen extends JFrame {
         questionLabel.setHorizontalAlignment(SwingConstants.CENTER);
         mainPanel.add(questionLabel, BorderLayout.NORTH);
 
-        // Painel de Opções de Voto
         JPanel optionsPanel = new JPanel();
         optionsPanel.setLayout(new BoxLayout(optionsPanel, BoxLayout.Y_AXIS));
         optionsPanel.setBorder(new EmptyBorder(10, 10, 10, 10));
 
-        // Botões ou Checkbox pra as opções
         buttonGroup = new ButtonGroup();
         for (String option : electionData.getOptions()) {
             JRadioButton optionButton = new JRadioButton(option);
@@ -64,13 +73,11 @@ public class VotingScreen extends JFrame {
             optionsPanel.add(optionButton);
         }
 
-        // Adiciona o painel de opções ao centro do painel principal
         JScrollPane scrollPane = new JScrollPane(optionsPanel);
         scrollPane.setVerticalScrollBarPolicy(JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED);
         scrollPane.setHorizontalScrollBarPolicy(JScrollPane.HORIZONTAL_SCROLLBAR_AS_NEEDED);
         mainPanel.add(scrollPane);
 
-        // Footer -> Botão de Votar
         voteButton = new JButton("Confirmar Voto");
         voteButton.setFont(new Font("Arial", Font.BOLD, 14));
         voteButton.setBackground(new Color(100, 149, 237));
@@ -88,7 +95,9 @@ public class VotingScreen extends JFrame {
         setVisible(true);
     }
 
-    // Confirmação de voto
+    /** Handles the vote confirmation process when the user clicks the confirm button.
+      * Validates the selection, creates a Vote object, and sends it to the server.
+      * Displays appropriate messages for successful submission or errors.       */
     private void confirmVote() {
         String selectedOption = null;
 
@@ -114,7 +123,9 @@ public class VotingScreen extends JFrame {
             JOptionPane.showMessageDialog(this, "Por favor, selecione uma opção antes de confirmar.");
         }
     }
-
+    /** Sends the vote to the server through the client connection handler.
+      * @param vote The Vote object containing the user's CPF and selected option
+      * @throws IOException If there is an error in sending the vote to the server   */
     private void sendVoteToServer(Vote vote) throws IOException {
         clientConnectionHandler.sendVote(vote);
     }

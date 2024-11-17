@@ -1,7 +1,5 @@
 package server;
 
-/* Classe para gerenciar as conexões com os clientes */
-
 import clientServer.ElectionData;
 import clientServer.Vote;
 import clientServer.VoteHandler;
@@ -11,32 +9,43 @@ import java.io.ObjectInputStream;
 import java.io.ObjectOutputStream;
 import java.net.Socket;
 
+/** ClientHandler manages individual client connections in the distributed voting system.
+  * It runs as a separate thread for each connected client, handling all communication
+  * including login validation, vote processing, and election data distribution.             */
 public class ClientHandler implements Runnable {
-    private final Socket clientSocket;
-    private final ElectionData electionData;
-    private final VoteHandler voteHandler;
-    private ObjectOutputStream out;
-    private ObjectInputStream in;
-    private boolean isConnected = true;
+    private final Socket clientSocket;                      // Socket connection to the client
+    private final ElectionData electionData;                // Election configuration and options data
+    private final VoteHandler voteHandler;                  // Manages vote storage and validation
+    private ObjectOutputStream out;                         // Stream for sending objects to client
+    private ObjectInputStream in;                           // Stream for receiving objects from client
+    private boolean isConnected = true;                     // Flag indicating if client connection is active
 
-    // Construtor -> Recebe o socket do cliente e os dados da eleição
+    /** Creates a new client handler with the specified socket and election data.
+      * @param clientSocket Socket connection to the client
+      * @param electionData Current election configuration
+      * @param voteHandler Vote storage and validation manager                             */
     public ClientHandler(Socket clientSocket, ElectionData electionData, VoteHandler voteHandler) {
         this.clientSocket = clientSocket;
         this.electionData = electionData;
         this.voteHandler = voteHandler;
     }
 
+    /** Main execution loop for handling client communication.
+      * Initializes streams, sends election data, and processes client messages:
+      * - CPF validation requests
+      * - Vote submissions
+      * - Disconnect requests                                                               */
     @Override
     public void run() {
         try {
-            // Iniciar streams de comunicação
+            // Initialize communication streams
             out = new ObjectOutputStream(clientSocket.getOutputStream());
             in = new ObjectInputStream(clientSocket.getInputStream());
 
-            // Enviar os dados da votação para o cliente
+            // Send initial election configuration
             sendElectionData();
 
-            // Loop pra escutar mensagens do cliente
+            // Process client messages until disconnection
             while (isConnected) {
                 Object receivedObject = in.readObject();
 
@@ -46,7 +55,6 @@ public class ClientHandler implements Runnable {
                 } else if (receivedObject instanceof Vote vote) {
                     processVote(vote);
                 } else if ("DISCONNECT".equals(receivedObject)) {
-                    // Cliente desconectou
                     isConnected = false;
                 }
             }
@@ -59,14 +67,19 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    // Envia o ElectionData ao Cliente
+    /** Sends election configuration data to the client.
+      * This includes voting options and any relevant election parameters.
+      *
+      * @throws IOException If there's an error sending the data                   */
     private void sendElectionData() throws IOException {
         out.writeObject(electionData);
         out.flush();
         System.out.println("Dados da eleição enviados ao cliente.");
     }
 
-    // Verifica se o CPF já votou
+    /** Validates if a CPF has already voted in the election.
+      * Sends appropriate response message to the client.
+      * @param cpf The CPF number to validate                                    */
     private void processLogin(String cpf) {
         if (voteHandler.hasVoted(cpf)) {
             sendMessage("CPF já votou");
@@ -74,8 +87,9 @@ public class ClientHandler implements Runnable {
             sendMessage("CPF não votou");
         }
     }
-
-    // Processa o voto recebido e registra no VoteHandler
+    /** Processes a vote submission from the client.
+      * Validates and records the vote, then sends confirmation message.
+      * @param vote The Vote object containing the CPF and voting choice           */
     private void processVote(Vote vote) {
         if (voteHandler.addVote(vote)) {
             sendMessage("Voto registrado com sucesso!");
@@ -84,7 +98,8 @@ public class ClientHandler implements Runnable {
         }
     }
 
-    // Envia uma mensagem ao cliente
+    /** Sends a message to the connected client.
+      * @param message The message to send                                       */
     private void sendMessage(String message) {
         try {
             out.writeObject(message);
@@ -93,8 +108,8 @@ public class ClientHandler implements Runnable {
             System.out.println("Erro ao enviar mensagem ao cliente: " + e.getMessage());
         }
     }
-
-    // Encerra a conexão com o cliente
+    /** Cleanly closes all connections and streams with the client.
+      * Should be called when shutting down the connection or handling errors.     */
     public void disconnectClient() {
         try {
             isConnected = false;
