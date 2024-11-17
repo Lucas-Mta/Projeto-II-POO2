@@ -14,7 +14,6 @@ public class ClientMain {
             String serverAddress;
             int port;
 
-            // Loop para obter um endereço IP válido
             while (true) {
                 serverAddress = JOptionPane.showInputDialog(null, "Digite o endereço IP do servidor:", "Configuração do Servidor", JOptionPane.QUESTION_MESSAGE);
 
@@ -25,16 +24,15 @@ public class ClientMain {
                         System.exit(0);
                     }
                 } else {
-                    break; // Endereço IP válido foi inserido
+                    break;
                 }
             }
 
-            // Loop para obter uma porta válida
             while (true) {
                 String portInput = JOptionPane.showInputDialog(null, "Digite a porta do servidor:", "Configuração do Servidor", JOptionPane.QUESTION_MESSAGE);
                 try {
                     port = Integer.parseInt(portInput);
-                    break; // Porta válida foi inserida
+                    break;
                 } catch (NumberFormatException e) {
                     int retry = JOptionPane.showConfirmDialog(null, "Porta inválida! Deseja tentar novamente?", "Erro", JOptionPane.YES_NO_OPTION);
                     if (retry == JOptionPane.NO_OPTION) {
@@ -44,7 +42,6 @@ public class ClientMain {
                 }
             }
 
-            // Inicializar a tela de login
             new LoginScreen(serverAddress, port).setVisible(true);
         });
     }
